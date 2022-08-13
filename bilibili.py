@@ -1260,7 +1260,7 @@ def main(dic):
     export_process.join()
 
 if __name__ == "__main__":
-    cookie = "DedeUserID=********;DedeUserID__ckMd5=***************;SESSDATA=***************************;bili_jct=***************************;sid=******;\n"
+    cookie = "\n"
     # 更新配置文件
     dic = {"aid_list": ["386644197"],  # aid列表
         "watch_enable": True,  # 观看开关
