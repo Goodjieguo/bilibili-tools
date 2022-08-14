@@ -83,8 +83,8 @@ def login():
     im.show()
     while True:
         cookie, credential = check_qrcode_events(token)  # 改写的login_func.check_qrcode_events
-        time.sleep(1)
-        if len(cookie) > 2:
+        time.sleep(1.5)
+        if isinstance(cookie, str):
             im.close()
             break
     return cookie, credential
