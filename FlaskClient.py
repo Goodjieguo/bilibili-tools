@@ -17,8 +17,9 @@ dic = {"aid_list": ["386644197"],  # aid列表
 
 url = 'http://127.0.0.1:9000'
 url = 'http://192.168.31.68:9000'
-url = 'https://service-2sah84rv-1258669631.cd.apigw.tencentcs.com/release/'
-url = 'http://1.14.23.34:9000'
+url = 'https://service-ikumbetn-1258669631.cd.apigw.tencentcs.com/release/'
+# url = 'http://1.14.23.34:9000'
 headers = {'content-type': 'application/json'}
 h = requests.post(url=url, json=json.dumps(dic, ensure_ascii=False), headers=headers)
-print(h.text)
+return_dic = json.loads(h.text)
+print(return_dic)

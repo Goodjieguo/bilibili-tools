@@ -1,7 +1,7 @@
 from flask import Flask, request
 import os
 import json
-import Bilibili
+import bilibili
 
 app = Flask(__name__)
 
@@ -11,8 +11,8 @@ def bilibili():
     data = request.get_data(as_text=True)
     jsonObj = json.loads(data)
     dic = json.loads(jsonObj)
-    Bilibili.freeze_support()
-    Bilibili.main(dic)
+    bilibili.freeze_support()
+    bilibili.main(dic)
     log_path = "./bilibili.log"
     with open(log_path, "r") as file:
         result = file.read()
