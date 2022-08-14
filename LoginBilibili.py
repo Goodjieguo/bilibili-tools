@@ -1,10 +1,12 @@
+import asyncio
 import time
 import uuid
 import json
 import enum
 import requests
 from PIL import Image
-from bilibili_api import login_func
+from bilibili_api import video, login_func
+from bilibili_api.utils.Credential import Credential
 from bilibili_api.utils.utils import get_api
 from bilibili_api.exceptions import LoginError
 
@@ -71,8 +73,8 @@ def check_qrcode_events(login_key):
             if cookie[:7] == "Expires":
                 sid = cookie[8:]
         cookie = f"DedeUserID={dede};DedeUserID__ckMd5={ckmd5};SESSDATA={sessdata};bili_jct={bili_jct};sid={sid};\n"
-        return cookie
-
+        credential = Credential(sessdata, bili_jct, dedeuserid=dede)
+        return cookie, credential
 
 def login():
     qrcode_result = login_func.get_qrcode()
@@ -80,13 +82,14 @@ def login():
     im = Image.open(qrcode_result[0])
     im.show()
     while True:
-        login_result = check_qrcode_events(token)  # 改写的login_func.check_qrcode_events
+        cookie, credential = check_qrcode_events(token)  # 改写的login_func.check_qrcode_events
         time.sleep(1)
-        if len(login_result) > 2:
+        if len(cookie) > 2:
             im.close()
             break
-    return login_result
+    return cookie, credential
+
 
 if __name__ == "__main__":
-    cookies = login()
+    cookies, credential = login()
     print(cookies)
