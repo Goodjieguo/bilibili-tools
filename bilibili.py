@@ -1277,5 +1277,3 @@ if __name__ == "__main__":
 
     freeze_support()
     main(dic)
-    if platform.system() == "Windows":
-        os.system("pause >nul | set /p =请按任意键退出")
