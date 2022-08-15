@@ -53,11 +53,13 @@ class SQLiteOperation():
         if expired:
             # 下载BV号进行访问
             bv_list = self.get_all_bv_and_switch()
-            return {"expired": True, "duedate": datetime, "bvlist": bv_list}
+            vip_bv_list = self.get_all_vip_bv_and_switch()
+            return {"expired": True, "duedate": datetime, "bvlist": bv_list, "vip_bv_list": vip_bv_list}
         else:
             # 下载BV号
             bv_list = self.get_all_bv_and_switch()
-            return {"expired": False, "duedate": datetime, "bvlist": bv_list}
+            vip_bv_list = self.get_all_vip_bv_and_switch()
+            return {"expired": False, "duedate": datetime, "bvlist": bv_list, "vip_bv_list": vip_bv_list}
 
     # 判断用户是否存在
     def judge_user_exists(self, user_dic):
@@ -174,11 +176,11 @@ if __name__ == '__main__':
     # res = databaseOperation.update_user_cookie_judge_expired(user_dic)  # 会员是否过期判断
     # res = databaseOperation.get_all_online_bv_and_switch()  # 拉取所有在线用户的BV号
     # res = databaseOperation.get_all_bv_and_switch()  # 拉取所有用户的BV号
-    res = databaseOperation.get_all_vip_bv_and_switch()
-    print(res)
+    # res = databaseOperation.get_all_vip_bv_and_switch()
+    # print(res)
     # databaseOperation.update_online_status()  # 用户登录状态更新
     # databaseOperation.update_switch_status()  # 会员过期下线权限更新
-    # databaseOperation.showdata()
+    databaseOperation.showdata()
     # res = databaseOperation.main(user_dic)
     # print(res)
     # 提交bv号和互助开关
