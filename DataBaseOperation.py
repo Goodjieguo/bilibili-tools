@@ -127,6 +127,13 @@ class SQLiteOperation():
         sql.close()
         return res
 
+    # 互助BV号拉取 会员用户
+    def get_all_vip_bv_and_switch(self):
+        sql = sqlite3.connect(self.UserDataBaseName)
+        res = sql.execute(f"select bvlist,switch from user where expireDate>datetime('now','localtime')").fetchall()
+        sql.close()
+        return res
+
     # 更新用户登录状态
     def update_online_status(self):
         """校对用户登录状态 超过五分钟就下线"""
@@ -167,11 +174,12 @@ if __name__ == '__main__':
     # res = databaseOperation.update_user_cookie_judge_expired(user_dic)  # 会员是否过期判断
     # res = databaseOperation.get_all_online_bv_and_switch()  # 拉取所有在线用户的BV号
     # res = databaseOperation.get_all_bv_and_switch()  # 拉取所有用户的BV号
-    # print(res)
+    res = databaseOperation.get_all_vip_bv_and_switch()
+    print(res)
     # databaseOperation.update_online_status()  # 用户登录状态更新
     # databaseOperation.update_switch_status()  # 会员过期下线权限更新
     # databaseOperation.showdata()
-    res = databaseOperation.main(user_dic)
-    print(res)
+    # res = databaseOperation.main(user_dic)
+    # print(res)
     # 提交bv号和互助开关
     # self.update_bv_and_switch_status(user_dic)
