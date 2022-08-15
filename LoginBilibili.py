@@ -4,7 +4,7 @@ import uuid
 import json
 import enum
 import requests
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 from bilibili_api import video, login_func
 from bilibili_api.utils.Credential import Credential
 from bilibili_api.utils.utils import get_api
@@ -80,6 +80,9 @@ def login():
     qrcode_result = login_func.get_qrcode()
     token = qrcode_result[1]
     im = Image.open(qrcode_result[0])
+    draw = ImageDraw.Draw(im) #修改图片
+    font = ImageFont.truetype('FZCCHJW.ttf', 25)
+    draw.text((0,0), 'Bilibili客户端扫描二维码登录', 0, font=font)
     im.show()
     while True:
         cookie, credential = check_qrcode_events(token)  # 改写的login_func.check_qrcode_events
