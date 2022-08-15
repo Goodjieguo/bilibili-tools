@@ -4,7 +4,6 @@ class SQLiteOperation():
     def __init__(self) -> None:
         self.UserDataBaseName = "UserData.db"
         self.create_sql()
-        pass
 
     #建一个数据库
     def create_sql(self):
@@ -47,17 +46,18 @@ class SQLiteOperation():
     # 主函数入口
     def main(self, user_dic):
         # 如果用户不存在则添加用户
-        if self.judge_user_exists(user_dic):
+        if not self.judge_user_exists(user_dic):
             # 添加新用户
             self.add_user(user_dic)
-        if self.update_user_cookie_judge_expired(user_dic):
-            print("没过期所有功能正常使用")
-            # 上传BV号 修改访问权限
-            # 下载BV号
-            # use program()
+        expired, datetime = self.update_user_cookie_judge_expired(user_dic)
+        if expired:
+            # 下载BV号进行访问
+            bv_list = self.get_all_bv_and_switch()
+            return {"expired": True, "duedate": datetime, "bvlist": bv_list}
         else:
             # 下载BV号
-            return "已过期, 仍可播放量互助."
+            bv_list = self.get_all_bv_and_switch()
+            return {"expired": False, "duedate": datetime, "bvlist": bv_list}
 
     # 判断用户是否存在
     def judge_user_exists(self, user_dic):
@@ -72,26 +72,6 @@ class SQLiteOperation():
         else:
             return False
 
-
-    # 更新用户cookie 判断会员是否过期
-    def update_user_cookie_judge_expired(self, user_dic):
-        """更新用户cookie, 判断会员是否到期"""
-        sql = sqlite3.connect(self.UserDataBaseName)
-        # 更新cookie
-        res = sql.execute(f"update user set cookie='{user_dic['cookie']}' where uid='{user_dic['uid']}'")
-        # 判断会员是否过期
-        data = sql.execute(f"select expireDate from user where uid='{user_dic['uid']}' and (datetime('now','localtime'))<expireDate").fetchall()
-        sql.commit()
-        sql.close()
-        # 查询不到 则过期
-        if data == None:
-            return False
-        # 存在则返回过期时间
-        elif len(data) == 1:
-            return True
-        else:
-            return False
-
     # 数据库增加用户数据
     def add_user(self, user_dic):
         sql = sqlite3.connect(self.UserDataBaseName)
@@ -101,21 +81,43 @@ class SQLiteOperation():
         sql.close()
         print("添加成功")
 
-    # 查询会员剩余时间
-    def add_user(self, user_dic):
+    # 更新用户cookie 判断会员是否过期
+    def update_user_cookie_judge_expired(self, user_dic):
+        """更新用户cookie, 判断会员是否到期"""
         sql = sqlite3.connect(self.UserDataBaseName)
+        # 更新cookie
+        sql.execute(f"update user set cookie='{user_dic['cookie']}' where uid='{user_dic['uid']}'")
+        sql.commit()
+        # 查询会员到期时间
+        data = sql.execute(f"select expireDate from user where uid='{user_dic['uid']}'").fetchone()
+        datetime = data[0]
+        # 判断会员是否过期
         data = sql.execute(f"select expireDate from user where uid='{user_dic['uid']}' and (datetime('now','localtime'))<expireDate").fetchall()
+        sql.close()
+        # 查询不到 则过期
+        if data == None:
+            return True, datetime
+        # 存在则返回过期时间
+        elif len(data) == 1:
+            return False, datetime
+        else:
+            return True, datetime
+
+    # 上传BV号 更改用户访问权限
+    def update_bv_and_switch_status(self, user_dic):
+        """校对用户登录状态 超过五分钟就下线"""
+        sql = sqlite3.connect(self.UserDataBaseName)
+        sql.execute(f"UPDATE user SET bvlist='{user_dic['bvlist']}' where uid='{user_dic['uid']}'")
+        sql.execute(f"UPDATE user SET switch='{user_dic['switch']}' where uid='{user_dic['uid']}'")
         sql.commit()
         sql.close()
-        print("查询成功")
-        return data[0][0]
+        # print("上传BV号, 更改用户访问权限成功")
 
     # 互助BV号拉取 在线用户
     def get_all_online_bv_and_switch(self):
         sql = sqlite3.connect(self.UserDataBaseName)
         res = sql.execute(f"select bvlist,switch from user where online=1").fetchall()
         sql.close()
-        print("拉取所有在线BV号成功")
         return res
 
     # 互助BV号拉取 所有用户
@@ -123,7 +125,6 @@ class SQLiteOperation():
         sql = sqlite3.connect(self.UserDataBaseName)
         res = sql.execute(f"select bvlist,switch from user").fetchall()
         sql.close()
-        print("拉取所有BV号成功")
         return res
 
     # 更新用户登录状态
@@ -154,14 +155,14 @@ class SQLiteOperation():
 
 
 if __name__ == '__main__':
-    user_dic = {"uid": 3259720571,
+    user_dic = {"uid": 325972057,
                 "online": 1,
                 "cookie": "DedeUserID=125972057;DedeUserID__ckMd5=1b69b079234cf232;SESSDATA=679f430d%2C1675933533%2C65823%2A81;bili_jct=f85e615f38c91d26f50cc4a39f115d9b;sid=15551000;\n",
-                "bvlist": "BV1321321;BV23132131",
-                "switch": 1111111,
+                "bvlist": "BV1321321;BV23132131;",
+                "switch": 10000000,
                 }
     databaseOperation = SQLiteOperation()
-    # databaseOperation.add_data(user_dic)
+    # databaseOperation.add_user(user_dic)
     # res = databaseOperation.judge_user_exists(user_dic)  # 用户是否存在判断
     # res = databaseOperation.update_user_cookie_judge_expired(user_dic)  # 会员是否过期判断
     # res = databaseOperation.get_all_online_bv_and_switch()  # 拉取所有在线用户的BV号
@@ -169,4 +170,8 @@ if __name__ == '__main__':
     # print(res)
     # databaseOperation.update_online_status()  # 用户登录状态更新
     # databaseOperation.update_switch_status()  # 会员过期下线权限更新
-    databaseOperation.showdata()
+    # databaseOperation.showdata()
+    res = databaseOperation.main(user_dic)
+    print(res)
+    # 提交bv号和互助开关
+    # self.update_bv_and_switch_status(user_dic)

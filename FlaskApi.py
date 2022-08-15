@@ -1,24 +1,30 @@
-from flask import Flask, request
-import os
 import json
-import bilibili
+import DataBaseOperation
+from flask import Flask, request
 
 app = Flask(__name__)
 
 # 有参数
 @app.route("/", methods=['POST'])
-def bilibili():
+def pull_bvlist():
+    """上传cookie 拉取bvlist进行访问"""
     data = request.get_data(as_text=True)
-    jsonObj = json.loads(data)
-    dic = json.loads(jsonObj)
-    bilibili.freeze_support()
-    bilibili.main(dic)
-    log_path = "./bilibili.log"
-    with open(log_path, "r") as file:
-        result = file.read()
-    os.remove(log_path)
-    return result
+    temp_json = json.loads(data)
+    upload_dic = json.loads(temp_json)
+    databaseOperation = DataBaseOperation.SQLiteOperation()
+    due_dic = databaseOperation.main(upload_dic)
+    return due_dic
 
+# 有参数
+@app.route("/commit", methods=['POST'])
+def push_bvlist():
+    """提交bvlist进行互助 修改互助权限"""
+    data = request.get_data(as_text=True)
+    temp_json = json.loads(data)
+    upload_dic = json.loads(temp_json)
+    databaseOperation = DataBaseOperation.SQLiteOperation()
+    databaseOperation.update_bv_and_switch_status(upload_dic)
+    return {"status": "提交bvlist成功."}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=9000)
